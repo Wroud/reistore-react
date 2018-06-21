@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Path } from "reistore";
+import { todosPath } from "./store";
 import { StoreConsumer } from "reistore-react";
 import { createTodo } from "./todoHelpers";
 
@@ -14,7 +14,7 @@ export const AddTodo = () => {
                         if (!input.value.trim()) {
                             return;
                         }
-                        store.instructor.add(Path.fromSelector(f => f.todos), createTodo(input.value));
+                        store.instructor.add(todosPath, createTodo(input.value));
                         input.value = '';
                     }}>
                         <input ref={node => input = node} />

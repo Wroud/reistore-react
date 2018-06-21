@@ -115,10 +115,9 @@ export class Connector<TStore, TState, TProps, TMap> extends React.Component<IPr
 
 export function connect<TStore, TState, TProps, TMap>(
     schema: IStoreSchema<TStore, TState>,
-    map: MapStateToProps<TState, TStore, Diff<TProps, TMap>, TMap>,
-    innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any)
+    map: MapStateToProps<TState, TStore, Diff<TProps, TMap>, TMap> = (f => f as any)
 ) {
-    return (props: Diff<TProps, TMap>) => (
+    return (innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any)) => (props: Diff<TProps, TMap>) => (
         <StoreConsumer>
             {store => (
                 <Consumer>

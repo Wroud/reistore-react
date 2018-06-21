@@ -25,11 +25,7 @@ describe("Connector", () => {
     function myComponent(props: IProps) {
         return <div>{props.a}{props.b}{props.c}{props.children}</div>;
     }
-    const ConnectedComponent = connect<IStore, IStore, IProps, IStore>(
-        schema,
-        ({ a, b }) => ({ a, b }),
-        myComponent
-    );
+    const ConnectedComponent = connect<IStore, IStore, IProps, IStore>(schema)(myComponent);
     beforeEach(() => {
         wrapper = mount(
             <div>

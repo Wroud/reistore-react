@@ -1,24 +1,20 @@
 import * as React from "react";
-import { Path } from "reistore";
+import { filterPath } from "./store";
 import { connect, StoreConsumer } from "reistore-react";
 import { schema } from "./store";
 
 const filter = ({ active, filter, text }) => (
     <StoreConsumer>
         {store => {
-            const onClick = () => {
-                store.instructor.set(
-                    Path.fromSelector(f => f.filter),
-                    filter
-                );
-            }
+            const onClick = () =>
+                store.instructor.set(filterPath, filter);
+
+            const style = { marginLeft: '4px' };
             return (
                 <button
                     onClick={onClick}
                     disabled={active}
-                    style={{
-                        marginLeft: '4px',
-                    }}
+                    style={style}
                 >
                     {text}
                 </button>
@@ -27,9 +23,7 @@ const filter = ({ active, filter, text }) => (
     </StoreConsumer>
 );
 
-
 export const Filter = connect(
     schema,
-    ({ filter }, props) => ({ active: filter === props.filter }),
-    filter
-);
+    ({ filter }, props) => ({ active: filter === props.filter })
+)(filter);

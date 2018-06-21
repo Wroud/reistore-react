@@ -29,5 +29,5 @@ export declare class Connector<TStore, TState, TProps, TMap> extends React.Compo
     subscribe: (connector: Connector<any, any, any, any>) => void;
     unSubscribe: (connector: Connector<any, any, any, any>) => void;
 }
-export declare function connect<TStore, TState, TProps, TMap>(schema: IStoreSchema<TStore, TState>, map: MapStateToProps<TState, TStore, Diff<TProps, TMap>, TMap>, innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any)): (props: Pick<TProps, Exclude<keyof TProps, keyof TMap>>) => JSX.Element;
+export declare function connect<TStore, TState, TProps, TMap>(schema: IStoreSchema<TStore, TState>, map?: MapStateToProps<TState, TStore, Diff<TProps, TMap>, TMap>): (innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any)) => (props: Pick<TProps, Exclude<keyof TProps, keyof TMap>>) => JSX.Element;
 export {};

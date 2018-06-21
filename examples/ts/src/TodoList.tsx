@@ -13,8 +13,4 @@ const todoList = ({ todos, filter }) => (
 );
 
 
-export const TodoList = connect(
-    schema,
-    state => state,
-    todoList
-);
+export const TodoList = connect(schema)(todoList);

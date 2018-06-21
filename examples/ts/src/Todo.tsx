@@ -1,21 +1,19 @@
 import * as React from "react";
-import { Path } from "reistore";
+import { todoCompletedPath } from "./store";
 import { StoreConsumer, connect } from "reistore-react";
 import { schema } from "./store";
 
 const todo = ({ id, completed, text }) => (
     <StoreConsumer>
         {store => {
-            const onClick = () => {
-                store.instructor.set(Path.fromSelector(f => f.todos[id].completed), !completed)
-            }
+            const onClick = () =>
+                store.instructor.set(todoCompletedPath(id), !completed);
+
+            const style = {
+                textDecoration: completed ? 'line-through' : 'none'
+            };
             return (
-                <li
-                    onClick={onClick}
-                    style={{
-                        textDecoration: completed ? 'line-through' : 'none'
-                    }}
-                >
+                <li onClick={onClick} style={style}>
                     {text}
                 </li>
             );
@@ -25,6 +23,5 @@ const todo = ({ id, completed, text }) => (
 
 export const Todo = connect(
     schema,
-    ({ todos }, props) => todos[props.id],
-    todo
-);
+    ({ todos }, props) => todos[props.id]
+)(todo);
