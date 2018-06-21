@@ -4,7 +4,7 @@ import "mocha";
 import * as React from "react";
 
 import { connect, StoreProvider } from "../src";
-import { Store, StoreSchema, Path } from "../node_modules/reistore";
+import { Store, StoreSchema, Path } from "reistore";
 
 describe("Connector", () => {
     let wrapper: ReactWrapper<any, any>;
@@ -23,7 +23,7 @@ describe("Connector", () => {
         c: string
     }
     function myComponent(props: IProps) {
-        return <div>{props.a}{props.b}{props.c}</div>;
+        return <div>{props.a}{props.b}{props.c}{props.children}</div>;
     }
     const ConnectedComponent = connect<IStore, IStore, IProps, IStore>(
         schema,
@@ -32,14 +32,18 @@ describe("Connector", () => {
     );
     beforeEach(() => {
         wrapper = mount(
-            <StoreProvider value={store}>
-                <ConnectedComponent c="sd" />
-            </StoreProvider>
+            <div>
+                <StoreProvider value={store}>
+                    <ConnectedComponent c="sd">
+                        <ConnectedComponent c="tt" />
+                    </ConnectedComponent>
+                </StoreProvider>
+            </div>
         );
     });
 
     it("correct render", () => {
-        const result = wrapper.find("myComponent").props() as any as IProps;
+        const result = wrapper.find("myComponent").first().props() as any as IProps;
 
         expect(result.a).to.be.equal(5);
         expect(result.b).to.be.equal(7);
@@ -47,7 +51,7 @@ describe("Connector", () => {
     });
     it("correct update", () => {
         store.instructor.set(Path.fromSelector(f => f.a), 10);
-        const result = wrapper.update().find("myComponent").props() as any as IProps;
+        const result = wrapper.update().find("myComponent").first().props() as any as IProps;
 
         expect(result.a).to.be.equal(10);
         expect(result.b).to.be.equal(7);
