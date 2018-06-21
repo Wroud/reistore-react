@@ -1,5 +1,5 @@
-import chai, { assert, expect, use } from "chai";
-import { mount, ReactWrapper, shallow } from "enzyme";
+import { expect } from "chai";
+import { mount, ReactWrapper } from "enzyme";
 import "mocha";
 import * as React from "react";
 
@@ -22,13 +22,13 @@ describe("Connector", () => {
         b: number,
         c: string
     }
-    function Component(props: IProps) {
+    function myComponent(props: IProps) {
         return <div>{props.a}{props.b}{props.c}</div>;
     }
     const ConnectedComponent = connect<IStore, IStore, IProps, IStore>(
         schema,
-        ({ a, b }, props) => ({ a, b }),
-        Component
+        ({ a, b }) => ({ a, b }),
+        myComponent
     );
     beforeEach(() => {
         wrapper = mount(
@@ -39,7 +39,7 @@ describe("Connector", () => {
     });
 
     it("correct render", () => {
-        const result = wrapper.find("Component").props() as any as IProps;
+        const result = wrapper.find("myComponent").props() as any as IProps;
 
         expect(result.a).to.be.equal(5);
         expect(result.b).to.be.equal(7);
@@ -47,7 +47,7 @@ describe("Connector", () => {
     });
     it("correct update", () => {
         store.instructor.set(Path.fromSelector(f => f.a), 10);
-        const result = wrapper.update().find("Component").props() as any as IProps;
+        const result = wrapper.update().find("myComponent").props() as any as IProps;
 
         expect(result.a).to.be.equal(10);
         expect(result.b).to.be.equal(7);

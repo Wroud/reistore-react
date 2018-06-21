@@ -9,7 +9,7 @@ export type MapStateToProps<TState, TStore, TProps, TMap> = (state: TState, prop
 export interface IProps<TStore, TState, TProps, TMap> {
     schema: IStoreSchema<TStore, TState>;
     map: MapStateToProps<TState, TStore, Diff<TProps, TMap>, TMap>;
-    component: React.ComponentClass<TProps> | ((props: TProps) => any);
+    innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any);
     props: Diff<TProps, TMap>;
 }
 export interface IContext {
@@ -53,7 +53,7 @@ export class Connector<TStore, TState, TProps, TMap> extends React.Component<IPr
                                 this.componentDidMount();
                                 this.isNeedRemount = false;
                             }
-                            const { schema, map, component: Component, props, children } = this.props;
+                            const { schema, map, innerComponent: InnerComponent, props, children } = this.props;
                             if (store) {
                                 this.lastData = isScope<TStore, any, TState>(schema)
                                     ? map(schema.getState(store.state), props, store.state)
@@ -61,7 +61,7 @@ export class Connector<TStore, TState, TProps, TMap> extends React.Component<IPr
                             }
                             return (
                                 <Provider value={this.selfContext}>
-                                    <Component {...this.lastData} {...props} children={children} />
+                                    <InnerComponent {...this.lastData} {...props} children={children} />
                                 </Provider>
                             );
                         }}
@@ -124,9 +124,9 @@ export class Connector<TStore, TState, TProps, TMap> extends React.Component<IPr
 export function connect<TStore, TState, TProps, TMap>(
     store: IStoreSchema<TStore, TState>,
     map: MapStateToProps<TState, TStore, Diff<TProps, TMap>, TMap>,
-    component: React.ComponentClass<TProps> | ((props: TProps) => any)
+    innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any)
 ) {
     return (props: Diff<TProps, TMap>) => (
-        <Connector<TStore, TState, TProps, TMap> schema={store} map={map} component={component} props={props} />
+        <Connector<TStore, TState, TProps, TMap> schema={store} map={map} innerComponent={innerComponent} props={props} />
     );
 }

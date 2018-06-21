@@ -7,7 +7,7 @@
     "react-dom": "16.4.0",
     "react-scripts-ts": "^2.16.0",
     "reistore": "1.0.4",
-    "reistore-redux": "1.0.5",
+    "reistore-react": "1.0.5",
     "classnames": "2.2.5"
   },
   "scripts": {
