@@ -3,11 +3,11 @@ import { Path } from "reistore";
 import { StoreConsumer, connect } from "reistore-react";
 import { schema } from "./store";
 
-const todo = ({ index, id, completed, text }) => (
+const todo = ({ id, completed, text }) => (
     <StoreConsumer>
         {store => {
             const onClick = () => {
-                store.instructor.set(Path.fromSelector(f => f.todos[index].completed), !completed)
+                store.instructor.set(Path.fromSelector(f => f.todos[id].completed), !completed)
             }
             return (
                 <li

@@ -6,10 +6,9 @@ import { getVisibleTodos } from "./todoHelpers";
 
 const todoList = ({ todos }) => (
     <ul>
-        {todos.map((todo, index) =>
+        {todos.map(todo =>
             <Todo
                 key={todo.id}
-                index={index}
                 {...todo}
             />
         )}
