@@ -19,6 +19,6 @@ const todoList = ({ todos }) => (
 
 export const TodoList = connect(
     schema,
-    ({ todos }, props) => ({ todos: getVisibleTodos(todos, props.filter) }),
+    ({ todos, filter }) => ({ todos: getVisibleTodos(todos, filter) }),
     todoList
 );

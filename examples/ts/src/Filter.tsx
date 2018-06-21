@@ -3,7 +3,7 @@ import { Path } from "reistore";
 import { connect, StoreConsumer } from "reistore-react";
 import { schema } from "./store";
 
-const filter = ({ active, filter, children }) => (
+const filter = ({ active, filter, text }) => (
     <StoreConsumer>
         {store => {
             const onClick = () => {
@@ -20,7 +20,7 @@ const filter = ({ active, filter, children }) => (
                         marginLeft: '4px',
                     }}
                 >
-                    {children}
+                    {text}
                 </button>
             )
         }}
