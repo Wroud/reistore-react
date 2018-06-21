@@ -25,6 +25,6 @@ const todo = ({ id, completed, text }) => (
 
 export const Todo = connect(
     schema,
-    ({ todos }, props) => ({ ...todos[props.id] }),
+    ({ todos }, props) => todos[props.id],
     todo
 );

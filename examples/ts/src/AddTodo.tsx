@@ -18,9 +18,7 @@ export const AddTodo = () => {
                         input.value = '';
                     }}>
                         <input ref={node => input = node} />
-                        <button type="submit">
-                            Add Todo
-              </button>
+                        <button type="submit">Add Todo</button>
                     </form>
                 </div>
             )}

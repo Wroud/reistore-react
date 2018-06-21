@@ -4,13 +4,10 @@ import { schema } from "./store";
 import { Todo } from "./Todo";
 import { getVisibleTodos } from "./todoHelpers";
 
-const todoList = ({ todos }) => (
+const todoList = ({ todos, filter }) => (
     <ul>
-        {todos.map(todo =>
-            <Todo
-                key={todo.id}
-                {...todo}
-            />
+        {getVisibleTodos(todos, filter).map(todo =>
+            <Todo key={todo.id} id={todo.id} />
         )}
     </ul>
 );
@@ -18,6 +15,6 @@ const todoList = ({ todos }) => (
 
 export const TodoList = connect(
     schema,
-    ({ todos, filter }) => ({ todos: getVisibleTodos(todos, filter) }),
+    state => state,
     todoList
 );

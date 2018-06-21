@@ -1,7 +1,7 @@
 let todosCount = 0;
 export function createTodo(text: string) {
     return {
-        id: ++todosCount,
+        id: todosCount++,
         completed: false,
         text
     }
