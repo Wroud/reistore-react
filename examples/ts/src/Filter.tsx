@@ -1,12 +1,12 @@
 import * as React from "react";
-import { filterPath } from "./store";
+import { path } from "./store";
 import { connect, StoreConsumer } from "reistore-react";
 
 const filter = ({ active, filter, text }) => (
     <StoreConsumer>
         {store => {
             const onClick = () =>
-                store.set(filterPath, filter);
+                store.set(path.filter, filter);
 
             const style = { marginLeft: '4px' };
             return (
