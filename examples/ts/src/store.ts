@@ -16,7 +16,6 @@ const initState: IStore = {
 };
 export const todosPath = Path.fromSelector((f: IStore) => f.todos);
 export const filterPath = Path.fromSelector((f: IStore) => f.filter);
-export const todosPath = Path.fromSelector((f: IStore) => f.todos);
 export const todoCompletedPath = (id: number) => Path.fromSelector((f: IStore) => f.todos[id].completed);
 export const schema = new StoreSchema<IStore, IStore>();
 export const store = new Store<IStore>(schema, initState);
