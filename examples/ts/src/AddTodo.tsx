@@ -14,7 +14,7 @@ export const AddTodo = () => {
                         if (!input.value.trim()) {
                             return;
                         }
-                        store.instructor.add(todosPath, createTodo(input.value));
+                        store.add(todosPath, createTodo(input.value));
                         input.value = '';
                     }}>
                         <input ref={node => input = node} />

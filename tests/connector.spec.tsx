@@ -4,7 +4,7 @@ import "mocha";
 import * as React from "react";
 
 import { connect, StoreProvider } from "../src";
-import { Store, StoreSchema, Path } from "reistore";
+import { Path, createStore } from "reistore";
 
 describe("Connector", () => {
     let wrapper: ReactWrapper<any, any>;
@@ -15,8 +15,7 @@ describe("Connector", () => {
         a: number,
         b: number,
     }
-    const schema = new StoreSchema();
-    const store = new Store<IStore>(schema, { a: 5, b: 7 });
+    const store = createStore<IStore>(undefined, { a: 5, b: 7 });
     interface IProps {
         a: number,
         b: number,
@@ -25,7 +24,7 @@ describe("Connector", () => {
     function myComponent(props: IProps) {
         return <div>{props.a}{props.b}{props.c}{props.children}</div>;
     }
-    const ConnectedComponent = connect<IStore, IStore, IProps, IStore>(schema)(myComponent);
+    const ConnectedComponent = connect<IStore, IStore, IProps, IStore>()(myComponent);
     beforeEach(() => {
         wrapper = mount(
             <div>

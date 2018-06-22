@@ -1,6 +1,5 @@
 import * as React from "react";
 import { connect } from "reistore-react";
-import { schema } from "./store";
 import { Todo } from "./Todo";
 import { getVisibleTodos } from "./todoHelpers";
 
@@ -13,4 +12,4 @@ const todoList = ({ todos, filter }) => (
 );
 
 
-export const TodoList = connect(schema)(todoList);
+export const TodoList = connect()(todoList);

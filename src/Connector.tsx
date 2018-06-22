@@ -7,8 +7,8 @@ type Diff<T, K> = Pick<T, Exclude<keyof T, keyof K>>;
 export type MapStateToProps<TState, TStore, TProps, TMap> = (state: TState, props: TProps, store: TStore) => TMap;
 
 export interface IProps<TStore, TState, TProps, TMap> {
-    schema: IStoreSchema<TStore, TState>;
-    map: MapStateToProps<TState, TStore, Diff<TProps, TMap>, TMap>;
+    schema?: IStoreSchema<TStore, TState>;
+    map: MapStateToProps<TState | TStore, TStore, Diff<TProps, TMap>, TMap>;
     innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any);
     props: Diff<TProps, TMap>;
     store?: Store<TStore>;
@@ -41,9 +41,9 @@ export class Connector<TStore, TState, TProps, TMap> extends React.Component<IPr
         const { store } = this.props;
         const { schema, map, innerComponent: InnerComponent, props } = this.props;
         if (store) {
-            this.lastData = isScope<TStore, any, TState>(schema)
-                ? map(schema.getState(store.state), props, store.state)
-                : map(schema.getState(store.state), props, store.state) as any;
+            this.lastData = isScope<TStore, any, TState>(schema || store.schema)
+                ? map((schema || store.schema).getState(store.state), props, store.state)
+                : map((schema || store.schema).getState(store.state), props, store.state) as any;
         }
         return (
             <Provider value={this.selfContext}>
@@ -65,9 +65,9 @@ export class Connector<TStore, TState, TProps, TMap> extends React.Component<IPr
             return;
         }
         const { schema, map, props } = this.props;
-        const mapped = isScope<TStore, any, TState>(schema)
-            ? map(schema.getState(store.state), props, store.state)
-            : map(schema.getState(store.state), props, store.state) as any;
+        const mapped = isScope<TStore, any, TState>((schema || store.schema))
+            ? map((schema || store.schema).getState(store.state), props, store.state)
+            : map((schema || store.schema).getState(store.state), props, store.state) as any;
 
         if (!shallowEqual(this.lastData, mapped)) {
             this.lastData = mapped;
@@ -114,8 +114,8 @@ export class Connector<TStore, TState, TProps, TMap> extends React.Component<IPr
 }
 
 export function connect<TStore, TState, TProps, TMap>(
-    schema: IStoreSchema<TStore, TState>,
-    map: MapStateToProps<TState, TStore, Diff<TProps, TMap>, TMap> = (f => f as any)
+    map: MapStateToProps<TState | TStore, TStore, Diff<TProps, TMap>, TMap> = (f => f as any),
+    schema?: IStoreSchema<TStore, TState>
 ) {
     return (innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any)) => (props: Diff<TProps, TMap>) => (
         <StoreConsumer>
