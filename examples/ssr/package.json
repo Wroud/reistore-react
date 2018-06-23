@@ -1,6 +1,6 @@
 {
-  "name": "Todo app with Reistore",
-  "description": "That example shows how to build React todos application with Reistore state manager",
+  "name": "SSR example",
+  "description": "That example shows how to build React app for ssr with Reistore",
   "version": "1.1.1",
   "main": "src/index.tsx",
   "dependencies": {
