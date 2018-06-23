@@ -6,7 +6,7 @@ const todo = ({ id, completed, text }) => (
     <StoreConsumer>
         {store => {
             const onClick = () =>
-                store.set(path.completed(id), !completed);
+                store.set(path.completed, !completed, [id]);
 
             const style = {
                 textDecoration: completed ? 'line-through' : 'none'
