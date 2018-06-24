@@ -1,5 +1,5 @@
 import * as React from "react";
-import { isScope, IStoreSchema, Store } from "reistore";
+import { isScope, ISchema, Store } from "reistore";
 import { shallowEqual } from "./shallowEqual";
 import { StoreConsumer } from "./StoreProvider";
 
@@ -7,7 +7,7 @@ type Diff<T, K> = Pick<T, Exclude<keyof T, keyof K>>;
 export type MapStateToProps<TState, TStore, TProps, TMap> = (state: TState, props: TProps, store: TStore) => TMap;
 
 export interface IProps<TStore, TState, TProps, TMap> {
-    schema?: IStoreSchema<TStore, TState>;
+    schema?: ISchema<TStore, TState>;
     map: MapStateToProps<TState | TStore, TStore, Diff<TProps, TMap>, TMap>;
     innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any);
     props: Diff<TProps, TMap>;
@@ -42,8 +42,8 @@ export class Connector<TStore, TState, TProps, TMap> extends React.Component<IPr
         const { schema, map, innerComponent: InnerComponent, props } = this.props;
         if (store) {
             this.lastData = isScope<TStore, any, TState>(schema || store.schema)
-                ? map((schema || store.schema).getState(store.state), props, store.state)
-                : map((schema || store.schema).getState(store.state), props, store.state) as any;
+                ? map((schema || store.schema).getState(store), props, store.state)
+                : map((schema || store.schema).getState(store), props, store.state) as any;
         }
         return (
             <Provider value={this.selfContext}>
@@ -66,8 +66,8 @@ export class Connector<TStore, TState, TProps, TMap> extends React.Component<IPr
         }
         const { schema, map, props } = this.props;
         const mapped = isScope<TStore, any, TState>((schema || store.schema))
-            ? map((schema || store.schema).getState(store.state), props, store.state)
-            : map((schema || store.schema).getState(store.state), props, store.state) as any;
+            ? map((schema || store.schema).getState(store), props, store.state)
+            : map((schema || store.schema).getState(store), props, store.state) as any;
 
         if (!shallowEqual(this.lastData, mapped)) {
             this.lastData = mapped;
@@ -115,14 +115,21 @@ export class Connector<TStore, TState, TProps, TMap> extends React.Component<IPr
 
 export function connect<TStore, TState, TProps, TMap>(
     map: MapStateToProps<TState | TStore, TStore, Diff<TProps, TMap>, TMap> = (f => f as any),
-    schema?: IStoreSchema<TStore, TState>
+    schema?: ISchema<TStore, TState>
 ) {
     return (innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any)) => (props: Diff<TProps, TMap>) => (
         <StoreConsumer>
             {store => (
                 <Consumer>
                     {context => (
-                        <Connector<TStore, TState, TProps, TMap> schema={schema} map={map} store={store} parentContext={context} innerComponent={innerComponent} props={props} />
+                        <Connector<TStore, TState, TProps, TMap>
+                            schema={schema}
+                            map={map}
+                            store={store}
+                            parentContext={context}
+                            innerComponent={innerComponent}
+                            props={props}
+                        />
                     )}
                 </Consumer>
             )}

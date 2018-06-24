@@ -1,14 +1,14 @@
 {
   "name": "Todo app with Reistore",
   "description": "That example shows how to build React todos application with Reistore state manager",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "main": "src/index.tsx",
   "dependencies": {
     "react": "16.4.0",
     "react-dom": "16.4.0",
     "react-scripts-ts": "^2.16.0",
-    "reistore": "1.1.2",
-    "reistore-react": "1.0.9",
+    "reistore": "1.1.3",
+    "reistore-react": "1.1.3",
     "classnames": "2.2.5"
   },
   "scripts": {

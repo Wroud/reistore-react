@@ -1,9 +1,9 @@
 import * as React from "react";
-import { IStoreSchema, Store } from "reistore";
+import { ISchema, Store } from "reistore";
 declare type Diff<T, K> = Pick<T, Exclude<keyof T, keyof K>>;
 export declare type MapStateToProps<TState, TStore, TProps, TMap> = (state: TState, props: TProps, store: TStore) => TMap;
 export interface IProps<TStore, TState, TProps, TMap> {
-    schema?: IStoreSchema<TStore, TState>;
+    schema?: ISchema<TStore, TState>;
     map: MapStateToProps<TState | TStore, TStore, Diff<TProps, TMap>, TMap>;
     innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any);
     props: Diff<TProps, TMap>;
@@ -29,5 +29,5 @@ export declare class Connector<TStore, TState, TProps, TMap> extends React.Compo
     subscribe: (connector: Connector<any, any, any, any>) => void;
     unSubscribe: (connector: Connector<any, any, any, any>) => void;
 }
-export declare function connect<TStore, TState, TProps, TMap>(map?: MapStateToProps<TState | TStore, TStore, Diff<TProps, TMap>, TMap>, schema?: IStoreSchema<TStore, TState>): (innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any)) => (props: Pick<TProps, Exclude<keyof TProps, keyof TMap>>) => JSX.Element;
+export declare function connect<TStore, TState, TProps, TMap>(map?: MapStateToProps<TState | TStore, TStore, Diff<TProps, TMap>, TMap>, schema?: ISchema<TStore, TState>): (innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any)) => (props: Pick<TProps, Exclude<keyof TProps, keyof TMap>>) => JSX.Element;
 export {};
