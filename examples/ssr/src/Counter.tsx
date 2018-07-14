@@ -2,7 +2,7 @@ import * as React from "react";
 import { path } from "./store";
 import { StoreConsumer, connect } from "reistore-react";
 
-export const counter = ({counter}) => {
+export const counter = ({ counter }) => {
     return (
         <StoreConsumer>
             {store => (
@@ -22,5 +22,5 @@ export const counter = ({counter}) => {
     )
 }
 export const Counter = connect(
-    ({ counter }) => ({counter})
+    ({ counter }) => ({ counter })
 )(counter);
