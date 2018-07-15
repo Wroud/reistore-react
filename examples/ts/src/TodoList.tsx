@@ -12,4 +12,4 @@ const todoList = ({ todos, filter }) => (
 );
 
 
-export const TodoList = connect()(todoList);
+export const TodoList = connect(undefined, undefined, () => true)(todoList);
