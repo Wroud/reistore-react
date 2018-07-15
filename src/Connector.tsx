@@ -1,138 +1,73 @@
 import * as React from "react";
-import { isScope, ISchema, Store } from "reistore";
+import { ISchema, IPath } from "reistore";
 import { shallowEqual } from "./shallowEqual";
 import { StoreConsumer } from "./StoreProvider";
+import { Subscriber, SubscribeConsumer, ISubscruberProps } from "./Subscriber";
 
 type Diff<T, K> = Pick<T, Exclude<keyof T, keyof K>>;
 export type MapStateToProps<TState, TStore, TProps, TMap> = (state: TState, props: TProps, store: TStore) => TMap;
 
-export interface IProps<TStore, TState, TProps, TMap> {
+export interface IConnectorProps<TStore, TState, TProps, TMap> extends ISubscruberProps<TStore, TProps> {
     schema?: ISchema<TStore, TState>;
+    subscriber?: (changes: IPath<TStore, any>[]) => boolean;
     map: MapStateToProps<TState | TStore, TStore, Diff<TProps, TMap>, TMap>;
-    innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any);
     props: Diff<TProps, TMap>;
-    store?: Store<TStore>;
-    parentContext?: IContext;
-}
-export interface IContext {
-    subscribe(connector: Connector<any, any, any, any>);
-    unSubscribe(connector: Connector<any, any, any, any>);
 }
 
-const { Provider, Consumer } = React.createContext<IContext | undefined>(undefined);
-
-export class Connector<TStore, TState, TProps, TMap> extends React.Component<IProps<TStore, TState, TProps, TMap>> {
-    private selfContext: IContext;
-    private parentContext?: IContext;
-    private connectors: Array<Connector<any, any, any, any>>;
-    private isStoreSubscribe: boolean;
+export class Connector<TStore, TState, TProps, TMap>
+    extends Subscriber<TStore, TProps, IConnectorProps<TStore, TState, TProps, TMap>>
+{
     private lastData?: TMap;
-    constructor(props: IProps<TStore, TState, TProps, TMap>) {
-        super(props);
-        this.connectors = [];
-        this.isStoreSubscribe = false;
-        this.parentContext = props.parentContext;
-        this.selfContext = {
-            subscribe: this.subscribe,
-            unSubscribe: this.unSubscribe
-        };
-    }
-    render() {
+    mapProps = () => {
         const { store } = this.props;
-        const { schema, map, innerComponent: InnerComponent, props } = this.props;
+        const { schema, map, props } = this.props;
         if (store) {
-            this.lastData = isScope<TStore, any, TState>(schema || store.schema)
-                ? map((schema || store.schema).getState(store), props, store.state)
-                : map((schema || store.schema).getState(store), props, store.state) as any;
+            this.lastData = map((schema || store.schema).getState(store), props, store.state);
         }
-        return (
-            <Provider value={this.selfContext}>
-                <InnerComponent {...this.lastData} {...props} />
-            </Provider>
-        );
+        return { ...this.lastData as any, ...props as any } as TProps;
     }
-    shouldComponentUpdate(props) {
-        const { parentContext } = props;
-        if ((this.isStoreSubscribe || parentContext) && this.parentContext !== parentContext) {
-            this.componentWillUnmount();
-            this.componentDidMount();
+    isNeedRerender = (changes: IPath<TStore, any>[]) => {
+        const { store, subscriber } = this.props;
+        if (subscriber) {
+            return subscriber(changes);
         }
-        return true;
-    }
-    update = () => {
-        const { store } = this.props;
         if (!store) {
-            return;
+            return false;
         }
         const { schema, map, props } = this.props;
-        const mapped = isScope<TStore, any, TState>((schema || store.schema))
-            ? map((schema || store.schema).getState(store), props, store.state)
-            : map((schema || store.schema).getState(store), props, store.state) as any;
+        const mapped = map((schema || store.schema).getState(store), props, store.state);
 
         if (!shallowEqual(this.lastData, mapped)) {
             this.lastData = mapped;
-            this.forceUpdate();
-        } else {
-            for (const connector of this.connectors) {
-                connector.update();
-            }
+            return true;
         }
-    }
-    componentDidMount() {
-        if (this.parentContext) {
-            this.parentContext.subscribe(this);
-        } else {
-            const { store } = this.props;
-            if (!store) {
-                return;
-            }
-            store.updateHandler.subscribe(this.update);
-            this.isStoreSubscribe = true;
-        }
-    }
-    componentWillUnmount() {
-        if (this.isStoreSubscribe) {
-            const { store } = this.props;
-            if (!store) {
-                return;
-            }
-            store.updateHandler.unSubscribe(this.update);
-            this.isStoreSubscribe = false;
-        } else if (this.parentContext) {
-            this.parentContext.unSubscribe(this);
-        }
-    }
-    subscribe = (connector: Connector<any, any, any, any>) => {
-        this.connectors.push(connector);
-    }
-    unSubscribe = (connector: Connector<any, any, any, any>) => {
-        const id = this.connectors.indexOf(connector);
-        if (id > -1) {
-            this.connectors.splice(id, 1);
-        }
+        return false;
     }
 }
 
 export function connect<TStore, TState, TProps, TMap>(
     map: MapStateToProps<TState | TStore, TStore, Diff<TProps, TMap>, TMap> = (f => f as any),
-    schema?: ISchema<TStore, TState>
+    schema?: ISchema<TStore, TState>,
+    subscriber?: (changes: IPath<TStore, any>[]) => boolean
 ) {
-    return (innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any)) => (props: Diff<TProps, TMap>) => (
-        <StoreConsumer>
-            {store => (
-                <Consumer>
-                    {context => (
-                        <Connector<TStore, TState, TProps, TMap>
-                            schema={schema}
-                            map={map}
-                            store={store}
-                            parentContext={context}
-                            innerComponent={innerComponent}
-                            props={props}
-                        />
-                    )}
-                </Consumer>
-            )}
-        </StoreConsumer>
-    );
+    return (innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any)) =>
+        (props: Diff<TProps, TMap>) => (
+            <StoreConsumer>
+                {store => (
+                    <SubscribeConsumer>
+                        {context => (
+                            <Connector<TStore, TState, TProps, TMap>
+                                schema={schema}
+                                map={map}
+                                store={store}
+                                provider={context}
+                                innerComponent={innerComponent}
+                                subscriber={subscriber}
+                                props={props}
+                            />
+                        )}
+                    </SubscribeConsumer>
+                )}
+            </StoreConsumer>
+        );
 }

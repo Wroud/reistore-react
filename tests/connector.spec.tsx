@@ -3,34 +3,61 @@ import { mount, ReactWrapper } from "enzyme";
 import "mocha";
 import * as React from "react";
 
-import { connect, StoreProvider } from "../src";
-import { Path, createStore } from "reistore";
+import { connect, StoreProvider, Primitive, withPrimitive } from "../src";
+import { Path, createStore, Store } from "reistore";
 
 describe("Connector", () => {
     let wrapper: ReactWrapper<any, any>;
     interface IRes {
-        c: string
+        id: number
+    }
+    interface IUser {
+        name: string
     }
     interface IStore {
-        a: number,
+        users: IUser[],
         b: number,
     }
-    const store = createStore<IStore>(undefined, { a: 5, b: 7 });
     interface IProps {
-        a: number,
+        id: number,
         b: number,
-        c: string
+        user: User
     }
+    
+    const store = createStore<IStore>(undefined, { users: [{ name: "abs" }, { name: "cc" }], b: 7 });
+    const userPath = Path.create<IStore, IUser>((f: IStore) => f.users["{}"]);
+    const userNamePath = userPath.join(f => f.name);
+
+    class User extends Primitive<IStore, IUser, IRes>{
+        map = (state: IStore, props: IRes) => {
+            return this.store.get(userPath, props.id);
+        }
+        changeName = (name: string) => {
+            this.store.set(userNamePath, name, this.props.id);
+        }
+    }
+
     function myComponent(props: IProps) {
-        return <div>{props.a}{props.b}{props.c}{props.children}</div>;
+        return (
+            <div onClick={() => props.user.changeName("hdhd")}>
+                {props.id}{props.user.state.name}{props.children}
+            </div>
+        );
     }
-    const ConnectedComponent = connect<IStore, IStore, IProps, IStore>()(myComponent);
+
+    const ConnectedComponent = connect<IStore, { b: number }, Pick<IProps, "id">, { b: number }>(
+        ({ b }, props) => ({ b }),
+        undefined,
+        changes => changes.some(path => path.includes(Path.create(f => f.b)))
+    )(withPrimitive<IStore, IProps, { user: typeof User }>(
+        { user: User }
+    )(myComponent));
     beforeEach(() => {
         wrapper = mount(
             <div>
                 <StoreProvider value={store}>
-                    <ConnectedComponent c="sd">
-                        <ConnectedComponent c="tt" />
+                    <ConnectedComponent id={0}>
+                        <ConnectedComponent id={1} />
                     </ConnectedComponent>
                 </StoreProvider>
             </div>
@@ -40,16 +67,24 @@ describe("Connector", () => {
     it("correct render", () => {
         const result = wrapper.find("myComponent").first().props() as any as IProps;
 
-        expect(result.a).to.be.equal(5);
         expect(result.b).to.be.equal(7);
-        expect(result.c).to.be.equal("sd");
+        expect(result.id).to.be.equal(0);
+        expect(result.user.state.name).to.be.equal("abs");
     });
     it("correct update", () => {
-        store.instructor.set(Path.fromSelector(f => f.a), 10);
-        const result = wrapper.update().find("myComponent").first().props() as any as IProps;
+        store.instructor.set(Path.create(f => f.b), 10);
+        let result = wrapper.update().find("myComponent").first().props() as any as IProps;
 
-        expect(result.a).to.be.equal(10);
-        expect(result.b).to.be.equal(7);
-        expect(result.c).to.be.equal("sd");
+        expect(result.b).to.be.equal(10);
+        expect(result.id).to.be.equal(0);
+        expect(result.user.state.name).to.be.equal("abs");
+
+        result.user.changeName("kek");
+        result = wrapper.update().find("myComponent").first().props() as any as IProps;
+
+        expect(result.b).to.be.equal(10);
+        expect(result.id).to.be.equal(0);
+        expect(result.user.state.name).to.be.equal("kek");
+        expect(store.state.b).to.be.equal(10);
     });
 });
