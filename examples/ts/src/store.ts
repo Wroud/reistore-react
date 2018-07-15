@@ -15,8 +15,8 @@ const initState: IStore = {
     filter: 0
 };
 export const path = {
-    todos: Path.fromSelector((f: IStore) => f.todos["{}"]),
-    filter: Path.fromSelector((f: IStore) => f.filter),
-    completed: Path.fromSelector((f: IStore) => f.todos["{}"].completed)
+    todos: Path.create((f: IStore) => f.todos["{}"]),
+    filter: Path.create((f: IStore) => f.filter),
+    completed: Path.create((f: IStore) => f.todos["{}"].completed)
 }
 export const store = createStore<IStore>(undefined, initState);

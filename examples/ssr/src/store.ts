@@ -8,6 +8,6 @@ const initState: IStore = {
     counter: 0
 };
 export const path = {
-    counter: Path.fromSelector((f: IStore) => f.counter)
+    counter: Path.create((f: IStore) => f.counter)
 }
 export const store = () => createStore<IStore>(undefined, initState);
