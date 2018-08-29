@@ -1,9 +1,9 @@
 import * as React from "react";
 import { schema } from "./store";
-import { StoreProvider } from "reistore-react";
+import { StateProvider } from "reistore-react";
 
 export const Filter = ({ filter, text }) => (
-    <StoreProvider>
+    <StateProvider>
         {subscriber => {
             const onClick = () =>
                 subscriber.store.set(schema.filter, filter);
@@ -19,5 +19,5 @@ export const Filter = ({ filter, text }) => (
                 </button>
             )
         }}
-    </StoreProvider>
+    </StateProvider>
 );

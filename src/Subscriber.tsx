@@ -3,21 +3,18 @@ import {
     INode,
     IAccessorContainer,
     ExtractNodeValue,
-    INodeAccessor,
     INodeSubscriber,
-    Handler,
-    isCountainer,
-    PathNode
+    Handler
 } from "reistore";
 import { ISubscriber } from "./interfaces/ISubscriber";
 
 export class Subscriber<TRoot extends object | any[] | Map<any, any>>
     implements ISubscriber<TRoot>{
     store!: IStore<TRoot>;
-    private subscriptions: Map<INodeAccessor<TRoot, any>, INodeSubscriber<TRoot>>;
+    private subscriptions: INodeSubscriber<TRoot>[];
     private handler: Handler<TRoot>;
     constructor(handler: Handler<TRoot>) {
-        this.subscriptions = new Map();
+        this.subscriptions = [];
         this.handler = handler;
         this.get = this.get.bind(this);
     }
@@ -25,20 +22,16 @@ export class Subscriber<TRoot extends object | any[] | Map<any, any>>
         node: IAccessorContainer<TRoot, TNode>,
         strict: boolean = false
     ): ExtractNodeValue<TNode> {
-        let accessor = node as INodeAccessor<TRoot, TNode>;
-        if (isCountainer<TNode>(node)) {
-            accessor = node[PathNode] as any;
-        }
         let subscribed = false;
         for (const sub of this.subscriptions) {
-            if (!sub["0"].in(node, strict)) {
-                this.subscriptions.set(accessor, this.store.subscribe(this.handler, node, strict));
+            if (!sub.node.in(node, strict)) {
+                this.subscriptions.push(this.store.subscribe(this.handler, node, strict));
                 subscribed = true;
                 break;
             }
         }
         if (!subscribed) {
-            this.subscriptions.set(accessor, this.store.subscribe(this.handler, node, strict));
+            this.subscriptions.push(this.store.subscribe(this.handler, node, strict));
         }
         return this.store.get(node);
     }
@@ -47,8 +40,8 @@ export class Subscriber<TRoot extends object | any[] | Map<any, any>>
     }
     unSubscribeAll() {
         for (const sub of this.subscriptions) {
-            sub["1"].unSubscribe();
+            sub.unSubscribe();
         }
-        this.subscriptions.clear();
+        this.subscriptions = [];
     }
 }
