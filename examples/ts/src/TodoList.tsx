@@ -8,7 +8,7 @@ export const TodoList = () => (
     <StateProvider>
         {subscriber => {
             let filter = subscriber.get(schema.filter);
-            let todos = subscriber.get(schema.todos, true);
+            let todos = subscriber.get(schema.todos);
             return (
                 <ul>
                     {getVisibleTodos(todos, filter).map(todo =>

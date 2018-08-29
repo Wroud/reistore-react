@@ -7,7 +7,7 @@ export const Todo = ({ id }) => (
         {subscriber => {
             const { completed, text } = subscriber.get(schema.todos(id));
             const onClick = () =>
-                subscriber.store.set(schema.todos(id, t => t.completed), c => !c);
+                subscriber.store.set(schema.todos(id, t => t.completed), !completed);
 
             const style = {
                 textDecoration: completed ? 'line-through' : 'none'

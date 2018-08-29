@@ -1,12 +1,12 @@
 import * as React from "react";
 import { schema } from "./store";
-import { StateProvider } from "reistore-react";
+import { StoreConsumer } from "reistore-react";
 import { createTodo } from "./todoHelpers";
 
 export const AddTodo = () => {
     let input;
     return (
-        <StateProvider>
+        <StoreConsumer>
             {store => (
                 <div>
                     <form onSubmit={e => {
@@ -14,7 +14,8 @@ export const AddTodo = () => {
                         if (!input.value.trim()) {
                             return;
                         }
-                        store.add(schema.todos, t => t.push(createTodo(input.value)));
+                        let todo = createTodo(input.value);
+                        store.add(schema.todos(todo.id), todo);
                         input.value = '';
                     }}>
                         <input ref={node => input = node} />
@@ -22,6 +23,6 @@ export const AddTodo = () => {
                     </form>
                 </div>
             )}
-        </StateProvider>
+        </StoreConsumer>
     )
 }
