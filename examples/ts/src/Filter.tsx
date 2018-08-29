@@ -1,27 +1,23 @@
 import * as React from "react";
-import { path } from "./store";
-import { connect, StoreConsumer } from "reistore-react";
+import { schema } from "./store";
+import { StoreProvider } from "reistore-react";
 
-const filter = ({ active, filter, text }) => (
-    <StoreConsumer>
-        {store => {
+export const Filter = ({ filter, text }) => (
+    <StoreProvider>
+        {subscriber => {
             const onClick = () =>
-                store.set(path.filter, filter);
+                subscriber.store.set(schema.filter, filter);
 
             const style = { marginLeft: '4px' };
             return (
                 <button
                     onClick={onClick}
-                    disabled={active}
+                    disabled={filter === subscriber.get(schema.filter)}
                     style={style}
                 >
                     {text}
                 </button>
             )
         }}
-    </StoreConsumer>
+    </StoreProvider>
 );
-
-export const Filter = connect(
-    ({ filter }, props) => ({ active: filter === props.filter })
-)(filter);

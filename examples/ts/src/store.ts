@@ -1,4 +1,4 @@
-import { createStore, Path } from "reistore";
+import { createStore, buildSchema } from "reistore";
 
 interface ITodo {
     id: number;
@@ -14,9 +14,11 @@ const initState: IStore = {
     todos: [],
     filter: 0
 };
-export const path = {
-    todos: Path.create((f: IStore) => f.todos["{}"]),
-    filter: Path.create((f: IStore) => f.filter),
-    completed: Path.create((f: IStore) => f.todos["{}"].completed)
-}
-export const store = createStore<IStore>(undefined, initState);
+export const { schema } = buildSchema<IStore>()
+    .field("filter")
+    .array("todos", b => b
+        .field("id")
+        .field("text")
+        .field("completed")
+    );
+export const store = createStore<IStore>(initState);

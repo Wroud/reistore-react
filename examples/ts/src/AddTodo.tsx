@@ -1,5 +1,5 @@
 import * as React from "react";
-import { path } from "./store";
+import { schema } from "./store";
 import { StoreConsumer } from "reistore-react";
 import { createTodo } from "./todoHelpers";
 
@@ -14,7 +14,7 @@ export const AddTodo = () => {
                         if (!input.value.trim()) {
                             return;
                         }
-                        store.add(path.todos, createTodo(input.value));
+                        store.add(schema.todos, t => t.push(createTodo(input.value)));
                         input.value = '';
                     }}>
                         <input ref={node => input = node} />

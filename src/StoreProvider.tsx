@@ -1,4 +1,7 @@
-import { Store } from "reistore";
+import { IStore } from "reistore";
 import * as React from "react";
 
-export const { Consumer: StoreConsumer, Provider: StoreProvider } = React.createContext<Store<any> | undefined>(undefined);
+export const {
+    Consumer: StoreConsumer,
+    Provider: StoreProvider
+} = React.createContext<IStore<any> | undefined>(undefined);

@@ -3,8 +3,8 @@ import { mount, ReactWrapper } from "enzyme";
 import "mocha";
 import * as React from "react";
 
-import { connect, StoreProvider, Primitive, withPrimitive } from "../src";
-import { Path, createStore, Store } from "reistore";
+import { StoreProvider, Subscriber, StoreConsumer, StateProvider } from "../src";
+import { createStore, Store, buildSchema } from "reistore";
 
 describe("Connector", () => {
     let wrapper: ReactWrapper<any, any>;
@@ -18,73 +18,67 @@ describe("Connector", () => {
         users: IUser[],
         b: number,
     }
-    interface IProps {
-        id: number,
-        b: number,
-        user: User
-    }
-    
-    const store = createStore<IStore>(undefined, { users: [{ name: "abs" }, { name: "cc" }], b: 7 });
-    const userPath = Path.create<IStore, IUser>((f: IStore) => f.users["{}"]);
-    const userNamePath = userPath.join(f => f.name);
 
-    class User extends Primitive<IStore, IUser, IRes>{
-        map = (state: IStore, props: IRes) => {
-            return this.store.get(userPath, props.id);
-        }
-        changeName = (name: string) => {
-            this.store.set(userNamePath, name, this.props.id);
-        }
-    }
+    const store = createStore<IStore>({ users: [{ name: "abs" }, { name: "cc" }], b: 7 });
+    const { schema: { b, users } } = buildSchema<IStore>()
+        .field("b")
+        .array("users", b =>
+            b.field("name")
+        );
 
-    function myComponent(props: IProps) {
+    const UserComponent = (props: IRes) => {
         return (
-            <div onClick={() => props.user.changeName("hdhd")}>
-                {props.id}{props.user.state.name}{props.children}
-            </div>
+            <StateProvider>
+                {subscriber => {
+                    let user = subscriber.get(users(props.id));
+                    let changeName = () =>
+                        subscriber.store.set(users(props.id, u => u.name), "hdhd");
+                    return (
+                        <div onClick={changeName}>
+                            {user.name}
+                        </div>
+                    );
+                }}
+            </StateProvider>
         );
     }
-
-    const ConnectedComponent = connect<IStore, { b: number }, Pick<IProps, "id">, { b: number }>(
-        ({ b }, props) => ({ b }),
-        undefined,
-        changes => changes.some(path => path.includes(Path.create(f => f.b)))
-    )(withPrimitive<IStore, IProps, { user: typeof User }>(
-        { user: User }
-    )(myComponent));
     beforeEach(() => {
         wrapper = mount(
             <div>
                 <StoreProvider value={store}>
-                    <ConnectedComponent id={0}>
-                        <ConnectedComponent id={1} />
-                    </ConnectedComponent>
+                    <StateProvider>
+                        {subscriber => <span>{subscriber.get(b)}</span>}
+                    </StateProvider>
+                    <UserComponent id={0} />
                 </StoreProvider>
             </div>
         );
     });
 
     it("correct render", () => {
-        const result = wrapper.find("myComponent").first().props() as any as IProps;
+        const result = wrapper.find("UserComponent").first().props() as any as IRes;
+        const div = wrapper.find("UserComponent div").first().text();
+        const span = wrapper.find("span").first().text();
 
-        expect(result.b).to.be.equal(7);
         expect(result.id).to.be.equal(0);
-        expect(result.user.state.name).to.be.equal("abs");
+        expect(div).to.be.equal("abs");
+        expect(span).to.be.equal("7");
     });
     it("correct update", () => {
-        store.instructor.set(Path.create(f => f.b), 10);
-        let result = wrapper.update().find("myComponent").first().props() as any as IProps;
+        store.set(b, 10);
+        let result = wrapper.find("UserComponent").first().props() as any as IRes;
+        let div = wrapper.find("UserComponent div").first().text();
+        const span = wrapper.find("span").first().text();
 
-        expect(result.b).to.be.equal(10);
         expect(result.id).to.be.equal(0);
-        expect(result.user.state.name).to.be.equal("abs");
+        expect(div).to.be.equal("abs");
+        expect(span).to.be.equal("10");
 
-        result.user.changeName("kek");
-        result = wrapper.update().find("myComponent").first().props() as any as IProps;
+        store.set(users(0, u => u.name), "kek");
+        div = wrapper.update().find("UserComponent div").first().text();
 
-        expect(result.b).to.be.equal(10);
         expect(result.id).to.be.equal(0);
-        expect(result.user.state.name).to.be.equal("kek");
-        expect(store.state.b).to.be.equal(10);
+        expect(div).to.be.equal("kek");
+        expect(span).to.be.equal("10");
     });
 });

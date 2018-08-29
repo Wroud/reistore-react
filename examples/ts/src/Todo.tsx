@@ -1,12 +1,13 @@
 import * as React from "react";
-import { path } from "./store";
-import { StoreConsumer, connect } from "reistore-react";
+import { schema } from "./store";
+import { StoreProvider } from "reistore-react";
 
-const todo = ({ id, completed, text }) => (
-    <StoreConsumer>
-        {store => {
+export const Todo = ({ id }) => (
+    <StoreProvider>
+        {subscriber => {
+            const { completed, text } = subscriber.get(schema.todos(id));
             const onClick = () =>
-                store.set(path.completed, !completed, id);
+                subscriber.store.set(schema.todos(id, t => t.completed), c => !c);
 
             const style = {
                 textDecoration: completed ? 'line-through' : 'none'
@@ -17,9 +18,5 @@ const todo = ({ id, completed, text }) => (
                 </li>
             );
         }}
-    </StoreConsumer>
+    </StoreProvider>
 );
-
-export const Todo = connect(
-    ({ todos }, props) => todos[props.id]
-)(todo);

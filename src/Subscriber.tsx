@@ -1,93 +1,54 @@
-import * as React from "react";
-import { Store, IPath, Handler } from "reistore";
+import {
+    IStore,
+    INode,
+    IAccessorContainer,
+    ExtractNodeValue,
+    INodeAccessor,
+    INodeSubscriber,
+    Handler,
+    isCountainer,
+    PathNode
+} from "reistore";
+import { ISubscriber } from "./interfaces/ISubscriber";
 
-export const { Provider: SubscribeProvider, Consumer: SubscribeConsumer } = React.createContext<ISubscribeProvider | undefined>(undefined);
-export interface ISubscribeProvider {
-    subscribe(subscriber: ISubscriber<any>);
-    unSubscribe(subscriber: ISubscriber<any>);
-}
-export interface ISubscriber<TProps> extends ISubscribeProvider {
-    update: Handler<any>;
-    isNeedRerender: (updateList: IPath<any, any>[]) => boolean;
-    mapProps: () => TProps;
-}
-export interface ISubscruberProps<TStore, TProps> {
-    innerComponent: React.ComponentClass<TProps> | ((props: TProps) => any);
-    store?: Store<TStore>;
-    provider?: ISubscribeProvider;
-}
-
-export abstract class Subscriber<TState, TMappedProps, TProps extends ISubscruberProps<TState, TMappedProps>>
-    extends React.Component<TProps>
-    implements ISubscriber<TMappedProps>
-{
-    protected selfContext: ISubscribeProvider;
-    protected provider?: ISubscribeProvider;
-    protected subscribers: ISubscriber<any>[];
-    protected isStoreSubscribe: boolean;
-    constructor(props: TProps) {
-        super(props);
-        this.subscribers = [];
-        this.isStoreSubscribe = false;
-        this.provider = props.provider;
-        this.selfContext = {
-            subscribe: this.subscribe,
-            unSubscribe: this.unSubscribe
-        };
+export class Subscriber<TRoot extends object | any[] | Map<any, any>>
+    implements ISubscriber<TRoot>{
+    store!: IStore<TRoot>;
+    private subscriptions: Map<INodeAccessor<TRoot, any>, INodeSubscriber<TRoot>>;
+    private handler: Handler<TRoot>;
+    constructor(handler: Handler<TRoot>) {
+        this.subscriptions = new Map();
+        this.handler = handler;
+        this.get = this.get.bind(this);
     }
-    render() {
-        const { innerComponent: InnerComponent } = this.props as ISubscruberProps<TState, TMappedProps>;
-        return (
-            <SubscribeProvider value={this.selfContext}>
-                <InnerComponent {...this.mapProps()} />
-            </SubscribeProvider>
-        );
-    }
-    abstract mapProps: () => TMappedProps;
-    abstract isNeedRerender: (updateList: IPath<TState, any>[]) => boolean;
-    update = (state: TState, updateList: IPath<TState, any>[]) => {
-        if (this.isNeedRerender(updateList)) {
-            this.forceUpdate();
-            return;
+    get<TNode extends INode<TRoot, any, any, any, any>>(
+        node: IAccessorContainer<TRoot, TNode>,
+        strict: boolean = false
+    ): ExtractNodeValue<TNode> {
+        let accessor = node as INodeAccessor<TRoot, TNode>;
+        if (isCountainer<TNode>(node)) {
+            accessor = node[PathNode] as any;
         }
-        for (const subscriber of this.subscribers) {
-            subscriber.update(state, updateList);
+        let subscribed = false;
+        for (const sub of this.subscriptions) {
+            if (!sub["0"].in(node, strict)) {
+                this.subscriptions.set(accessor, this.store.subscribe(this.handler, node, strict));
+                subscribed = true;
+                break;
+            }
         }
-
-    }
-    shouldComponentUpdate(props: TProps) {
-        const { provider } = props;
-        if ((this.isStoreSubscribe || provider) && this.provider !== provider) {
-            this.componentWillUnmount();
-            this.componentDidMount();
+        if (!subscribed) {
+            this.subscriptions.set(accessor, this.store.subscribe(this.handler, node, strict));
         }
-        return true;
+        return this.store.get(node);
     }
-    componentDidMount() {
-        const { store } = this.props;
-        if (this.provider) {
-            this.provider.subscribe(this);
-        } else if (store) {
-            store.subscribe(this.update);
-            this.isStoreSubscribe = true;
+    setStore(store: IStore<TRoot>) {
+        this.store = store;
+    }
+    unSubscribeAll() {
+        for (const sub of this.subscriptions) {
+            sub["1"].unSubscribe();
         }
-    }
-    componentWillUnmount() {
-        const { store } = this.props;
-        if (this.isStoreSubscribe && store) {
-            store.unSubscribe(this.update);
-            this.isStoreSubscribe = false;
-        } else if (this.provider) {
-            this.provider.unSubscribe(this);
-        }
-    }
-    subscribe = (connector: ISubscriber<any>) => {
-        this.subscribers.push(connector);
-    }
-    unSubscribe = (connector: ISubscriber<any>) => {
-        const id = this.subscribers.indexOf(connector);
-        if (id > -1) {
-            this.subscribers.splice(id, 1);
-        }
+        this.subscriptions.clear();
     }
 }
