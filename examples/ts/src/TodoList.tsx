@@ -1,11 +1,11 @@
 import * as React from "react";
-import { StateProvider } from "reistore-react";
+import { StoreSubscriber } from "reistore-react";
 import { Todo } from "./Todo";
 import { getVisibleTodos } from "./todoHelpers";
 import { schema } from "./store";
 
 export const TodoList = () => (
-    <StateProvider>
+    <StoreSubscriber>
         {subscriber => {
             let filter = subscriber.get(schema.filter);
             let todos = subscriber.get(schema.todos);
@@ -17,5 +17,5 @@ export const TodoList = () => (
                 </ul>
             );
         }}
-    </StateProvider>
+    </StoreSubscriber>
 );

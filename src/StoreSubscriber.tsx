@@ -7,7 +7,7 @@ interface IProps<TRoot extends object | any[] | Map<any, any>> {
     children: (value: ISubscriber<TRoot>) => React.ReactNode;
 }
 
-export class StateProvider<TRoot extends object | any[] | Map<any, any>>
+export class StoreSubscriber<TRoot extends object | any[] | Map<any, any>>
     extends React.Component<IProps<TRoot>> {
     private subscriber: ISubscriber<TRoot>;
     constructor(props) {

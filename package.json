@@ -1,6 +1,6 @@
 {
   "name": "reistore-react",
-  "version": "1.3.0-beta1",
+  "version": "1.3.0-beta2",
   "description": "Reistore state connector for React",
   "main": "lib/index.js",
   "module": "lib/index.js",

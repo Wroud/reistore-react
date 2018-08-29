@@ -1,3 +1,3 @@
-export * from "./Connector";
+export * from "./StoreSubscriber";
 export * from "./StoreProvider";
 export * from "./Subscriber";

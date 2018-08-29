@@ -1,9 +1,9 @@
 import * as React from "react";
 import { schema } from "./store";
-import { StateProvider } from "reistore-react";
+import { StoreSubscriber } from "reistore-react";
 
 export const Todo = ({ id }) => (
-    <StateProvider>
+    <StoreSubscriber>
         {subscriber => {
             const { completed, text } = subscriber.get(schema.todos(id));
             const onClick = () =>
@@ -18,5 +18,5 @@ export const Todo = ({ id }) => (
                 </li>
             );
         }}
-    </StateProvider>
+    </StoreSubscriber>
 );

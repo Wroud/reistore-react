@@ -3,7 +3,7 @@ import { mount, ReactWrapper } from "enzyme";
 import "mocha";
 import * as React from "react";
 
-import { StoreProvider, Subscriber, StoreConsumer, StateProvider } from "../src";
+import { StoreProvider, Subscriber, StoreConsumer, StoreSubscriber } from "../src";
 import { createStore, Store, buildSchema } from "reistore";
 
 describe("Connector", () => {
@@ -28,7 +28,7 @@ describe("Connector", () => {
 
     const UserComponent = (props: IRes) => {
         return (
-            <StateProvider>
+            <StoreSubscriber>
                 {subscriber => {
                     let user = subscriber.get(users(props.id));
                     let changeName = () =>
@@ -39,16 +39,16 @@ describe("Connector", () => {
                         </div>
                     );
                 }}
-            </StateProvider>
+            </StoreSubscriber>
         );
     }
     beforeEach(() => {
         wrapper = mount(
             <div>
                 <StoreProvider value={store}>
-                    <StateProvider>
+                    <StoreSubscriber>
                         {subscriber => <span>{subscriber.get(b)}</span>}
-                    </StateProvider>
+                    </StoreSubscriber>
                     <UserComponent id={0} />
                 </StoreProvider>
             </div>
