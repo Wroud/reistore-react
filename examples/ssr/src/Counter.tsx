@@ -1,26 +1,23 @@
 import * as React from "react";
-import { path } from "./store";
-import { StoreConsumer, connect } from "reistore-react";
+import { schema } from "./store";
+import { StoreSubscriber } from "reistore-react";
 
-export const counter = ({ counter }) => {
+export const Counter = () => {
     return (
-        <StoreConsumer>
-            {store => (
+        <StoreSubscriber>
+            {subscriber => (
                 <div>
-                    <div>{counter}</div>
-                    <button onClick={() => store.set(path.counter, v => v + 1)}>
+                    <div>{subscriber.get(schema.counter)}</div>
+                    <button onClick={() => subscriber.store.set(schema.counter, v => v + 1)}>
                         Increment
                     </button>
-                    <button onClick={() => store.set(path.counter, v => v - 1)}>
+                    <button onClick={() => subscriber.store.set(schema.counter, v => v - 1)}>
                         Decrement
                     </button>
                     <br />
                     <br />
                 </div>
             )}
-        </StoreConsumer>
+        </StoreSubscriber>
     )
 }
-export const Counter = connect(
-    ({ counter }) => ({ counter })
-)(counter);

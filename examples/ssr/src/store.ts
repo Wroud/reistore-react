@@ -1,13 +1,9 @@
-import { createStore, Path } from "reistore";
+import { createStore, buildSchema } from "reistore";
 
 interface IStore {
     counter: number;
 }
 
-const initState: IStore = {
-    counter: 0
-};
-export const path = {
-    counter: Path.create((f: IStore) => f.counter)
-}
-export const store = () => createStore<IStore>(undefined, initState);
+export const { schema } = buildSchema<IStore>()
+    .field("counter", () => 0 as number);
+export const store = () => createStore<IStore>();
